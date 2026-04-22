@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DSA Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+
+    <div class="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <span class="logo-bracket">{</span>
+          <span class="logo-text">DSA</span>
+          <span class="logo-bracket">}</span>
+          <span class="logo-sub">visualizer</span>
+        </div>
+        <div class="header-right">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">connecting...</span>
+        </div>
+      </header>
+
+      <main class="main">
+        <!-- Left Panel: Controls + Complexity -->
+        <aside class="sidebar">
+          <div class="panel">
+            <div class="panel-label">ALGORITHM</div>
+            <div class="algo-name" id="algoName">Bubble Sort</div>
+            <div class="algo-desc" id="algoDesc">
+              Repeatedly steps through the list, compares adjacent elements and
+              swaps them if they are in the wrong order.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-label">COMPLEXITY</div>
+            <div class="complexity-grid">
+              <div class="complexity-item">
+                <span class="complexity-label">Best</span>
+                <span class="complexity-value good" id="best">O(n)</span>
+              </div>
+              <div class="complexity-item">
+                <span class="complexity-label">Average</span>
+                <span class="complexity-value warn" id="avg">O(n²)</span>
+              </div>
+              <div class="complexity-item">
+                <span class="complexity-label">Worst</span>
+                <span class="complexity-value bad" id="worst">O(n²)</span>
+              </div>
+              <div class="complexity-item">
+                <span class="complexity-label">Space</span>
+                <span class="complexity-value good" id="space">O(1)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-label">INPUT</div>
+            <div class="input-group">
+              <label class="input-label">Array</label>
+              <input
+                type="text"
+                id="arrayInput"
+                value="5,3,8,1,9,2,7,4"
+                class="input-field"
+              />
+            </div>
+            <div class="input-group">
+              <label class="input-label"
+                >Speed — <span id="speedDisplay">200ms</span></label
+              >
+              <input
+                type="range"
+                id="speedInput"
+                min="50"
+                max="1000"
+                value="200"
+                class="slider"
+              />
+              <div class="slider-labels">
+                <span>Fast</span>
+                <span>Slow</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-label">STATS</div>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value" id="compareCount">0</span>
+                <span class="stat-label">Comparisons</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="actionCount">0</span>
+                <span class="stat-label" id="stat-label">Swaps</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls">
+            <select id="algoSelect" class="input-field">
+              <option value="BUBBLE">Bubble Sort</option>
+              <option value="MERGE">Merge Sort</option>
+              <option value="QUICK">Quick Sort</option>
+            </select>
+            <button class="btn btn-primary" id="startBtn">
+              <span class="btn-icon">▶</span> Start
+            </button>
+            <button class="btn btn-secondary" id="pauseBtn" disabled>
+              <span class="btn-icon">⏸</span> Pause
+            </button>
+            <button class="btn btn-ghost" id="resetBtn">
+              <span class="btn-icon">↺</span> Reset
+            </button>
+          </div>
+        </aside>
+
+        <!-- Right Panel: Canvas -->
+        <section class="visualizer">
+          <div class="step-display" id="stepDisplay">
+            <span class="step-type" id="stepType">READY</span>
+            <span class="step-message" id="stepMessage"
+              >Configure your array and press Start</span
+            >
+          </div>
+
+          <div class="canvas-wrapper">
+            <canvas id="canvas"></canvas>
+          </div>
+
+          <!-- Legend -->
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #4adeae"></span>
+              <span>Default</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #f59e0b"></span>
+              <span>Comparing</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #f43f5e"></span>
+              <span>Swapping</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #a78bfa"></span>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="visualizer.js"></script>
+  </body>
+</html>
