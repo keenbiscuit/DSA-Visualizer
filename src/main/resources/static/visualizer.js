@@ -30,7 +30,8 @@ let sortedIndices = new Set(); // tracks which bars are fully sorted
 function connect() {
   const socket = new SockJS("http://localhost:8080/ws");
   stompClient = Stomp.over(socket);
-  stompClient.debug = null; // silence stomp logs
+  //stompClient.debug = null; // silence stomp logs
+  stompClient.debug = (str) => console.log("STOMP:", str); // enable if you want verbose logs
 
   stompClient.connect(
     {},
@@ -38,8 +39,10 @@ function connect() {
       connected = true;
       document.getElementById("statusDot").classList.add("connected");
       document.getElementById("statusText").textContent = "connected";
-
-      stompClient.subscribe("/topic/steps", onStepReceived);
+      console.log("Connected: " + frame);
+      console.log("Session ID:", stompClient.ws._transport.url);
+      const sub = stompClient.subscribe("/user/queue/steps", onStepReceived);
+      console.log("Subscribed:", sub);
     },
     function (error) {
       console.error("Connection error:", error);
@@ -50,6 +53,7 @@ function connect() {
 
 // Handle Incoming Steps
 function onStepReceived(message) {
+  console.log("RAW MESSAGE RECEIVED:", message);
   const step = JSON.parse(message.body);
   console.log("Received step:", step);
 
@@ -371,8 +375,7 @@ function resetControls() {
   paused = false;
   document.getElementById("startBtn").disabled = false;
   document.getElementById("pauseBtn").disabled = true;
-  document.getElementById("pauseBtn").innerHTML =
-    '<span class="btn-icon">⏸</span> Pause';
+  document.getElementById("pauseBtn").textContent = "⏸ Pause";
   document.getElementById("pauseBtn").classList.remove("active");
 }
 

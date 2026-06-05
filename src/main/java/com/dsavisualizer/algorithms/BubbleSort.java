@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import com.dsavisualizer.session.SessionStateManager;
 
 import com.dsavisualizer.models.AlgoStep;
 
@@ -11,21 +12,13 @@ import com.dsavisualizer.models.AlgoStep;
 public class BubbleSort {
     // the 'what' sent over the websocket
     private final SimpMessagingTemplate messaging;
-    private volatile boolean paused = false;
+    private final SessionStateManager sessionStateManager;
 
-    // Spring injects SimpMessagingTemplate automatically
-    public BubbleSort(SimpMessagingTemplate messaging) {
+    // Spring injects dependencies automatically
+    public BubbleSort(SimpMessagingTemplate messaging, SessionStateManager sessionStateManager) {
         this.messaging = messaging;
-
+        this.sessionStateManager = sessionStateManager;
     }
-
-    public void pause() {
-        this.paused = true;
-    };
-
-    public void resume() {
-        this.paused = false;
-    };
 
     public void sort(int[] arr, String sessionId, int speed) {
 
@@ -34,8 +27,8 @@ public class BubbleSort {
             for (int j = 0; j < arr.length - i - 1; j++) {
 
                 // Check running flag prior to each step
-                while (paused) {
-                    
+                while (sessionStateManager.isSessionPaused(sessionId)) {
+
                     try {
                         Thread.sleep(100);// wait in 100ms chunks while paused
                     } catch (InterruptedException e) {
@@ -81,6 +74,6 @@ public class BubbleSort {
                 description,
                 Arrays.copyOf(state, state.length),
                 highlighted);
-        messaging.convertAndSend("/topic/steps", step);
+        messaging.convertAndSendToUser(sessionId, "/queue/steps", step);
     }
 }

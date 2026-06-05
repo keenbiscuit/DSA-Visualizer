@@ -6,27 +6,21 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.dsavisualizer.models.AlgoStep;
+import com.dsavisualizer.session.SessionStateManager;
 
 @Component
 public class MergeSort {
     private final SimpMessagingTemplate messaging;
-    private volatile boolean paused = false;
+    private final SessionStateManager sessionStateManager;
 
-    public MergeSort(SimpMessagingTemplate messaging) {
+    public MergeSort(SimpMessagingTemplate messaging, SessionStateManager sessionStateManager) {
         this.messaging = messaging;
+        this.sessionStateManager = sessionStateManager;
     }
 
-    public void pause() {
-        this.paused = true;
-    };
-
-    public void resume() {
-        this.paused = false;
-    };
-
     public void sort(int[] arr, String sessionId, int speed) {
-        int n = arr.length;
-        mergeSort(arr, 0, n - 1, sessionId, speed);
+
+        mergeSort(arr, 0, arr.length - 1, sessionId, speed);
         emit(sessionId, "COMPLETE", arr, new int[] {}, "Sort Complete!");
     }
 
@@ -48,9 +42,9 @@ public class MergeSort {
         int k = left; // pointer for position in arr
 
         while (i < mid - left + 1 && j < right - left + 1) {
-            
-            //Check paused flag
-            while (paused) {
+
+            // Check paused flag
+            while (sessionStateManager.isSessionPaused(sessionId)) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -61,7 +55,7 @@ public class MergeSort {
 
             emit(sessionId, "COMPARE",
                     arr,
-                    new int[] { i, j },
+                    new int[] { i + left, j + left },
                     "Comparing " + temp[i] + " and " + temp[j]);
 
             if (temp[i] <= temp[j]) {
@@ -74,7 +68,7 @@ public class MergeSort {
 
             emit(sessionId, "MERGE",
                     arr,
-                    new int[] { k},
+                    new int[] { k },
                     "Placing " + arr[k] + " at position " + k);
 
             try {
@@ -106,12 +100,8 @@ public class MergeSort {
 
     private void emit(String sessionId, String type, int[] state, int[] highlighted, String description) {
         System.out.println("Emitting: " + type + " to session: " + sessionId);
-        AlgoStep step = new AlgoStep(
-                type,
-                description,
-                Arrays.copyOf(state, state.length),
-                highlighted);
-        messaging.convertAndSend("/topic/steps", step);
+        AlgoStep step = new AlgoStep(type, description, Arrays.copyOf(state, state.length), highlighted);
+        messaging.convertAndSendToUser(sessionId, "/queue/steps", step);
     }
 
 }
